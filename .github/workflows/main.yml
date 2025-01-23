@@ -50,12 +50,20 @@ jobs:
     # Push the Docker image to Docker Hub
     - name: Push Docker image to Docker Hub
       run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/flask-app:latest  
+        docker push ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
+
+    # Set up SSH private key for AWS EC2 deployment
+    - name: Set up SSH key
+      run: echo "${{ secrets.AWS_SSH_KEY }}" > private_key.pem
+
+    # Change the permissions of the private key file
+    - name: Set permissions for SSH key
+      run: chmod 600 private_key.pem
 
     # Deploy the Flask app to AWS EC2
     - name: Deploy to AWS EC2
       run: |
-        ssh -i ${{ secrets.AWS_SSH_KEY }} ec2-user@${{ secrets.EC2_IP_ADDRESS }} << EOF
+        ssh -i private_key.pem ec2-user@${{ secrets.EC2_IP_ADDRESS }} << EOF
           # SSH into EC2 instance and pull the latest Docker image
           docker pull ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
           
