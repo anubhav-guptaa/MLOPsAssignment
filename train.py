@@ -11,6 +11,9 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, confusion_matrix
 import pytest
+from sklearn.model_selection import GridSearchCV
+import joblib
+import os
 
 # Load the dataset
 def load_data(file_path):
@@ -101,6 +104,36 @@ def naive_bayes(X_train, y_train):
     classifier.fit(X_train, y_train)
     return classifier
 
+# Hyperparameter tuning for Naive Bayes
+def tune_naive_bayes(X_train, y_train):
+    # Define the hyperparameters to tune
+    param_grid = {'var_smoothing': np.logspace(0, -9, num=100)}
+
+    # Create a Naive Bayes model
+    nb = GaussianNB()
+
+    # Set up GridSearchCV
+    grid_search = GridSearchCV(estimator=nb, param_grid=param_grid, cv=5, n_jobs=-1, verbose=1)
+    
+    # Fit the grid search to the training data
+    grid_search.fit(X_train, y_train)
+    
+    # Get the best parameters and the best score
+    print(f"Best parameters: {grid_search.best_params_}")
+    print(f"Best cross-validation score: {grid_search.best_score_}")
+
+    # Create 'model' directory if it does not exist
+    if not os.path.exists('model'):
+        os.makedirs('model')
+    
+    model_path = os.path.join('model', 'tuned_naive_bayes_model.pkl')
+    joblib.dump(grid_search.best_estimator_, model_path)
+    print(f"Tuned Naive Bayes model saved as '{model_path}'")
+
+    # Return the best model
+    return grid_search.best_estimator_
+
+
 # SVM Model
 def svm_model(X_train, y_train):
     classifier = SVC(kernel='linear', random_state=0)
@@ -134,17 +167,22 @@ def main():
     acc_log_reg = evaluate_model(classifier, X_test, y_test)
     print(f"Accuracy score: {acc_log_reg}\n")
 
+    # SVM
+    print("Support Vector Machine (SVM):")
+    classifier = svm_model(X_train, y_train)
+    acc_svm = evaluate_model(classifier, X_test, y_test)
+    print(f"Accuracy score: {acc_svm}\n")
+
     # Naive Bayes
     print("Naive Bayes:")
     classifier = naive_bayes(X_train, y_train)
     acc_naive_bayes = evaluate_model(classifier, X_test, y_test)
     print(f"Accuracy score: {acc_naive_bayes}\n")
     
-    # SVM
-    print("Support Vector Machine (SVM):")
-    classifier = svm_model(X_train, y_train)
-    acc_svm = evaluate_model(classifier, X_test, y_test)
-    print(f"Accuracy score: {acc_svm}\n")
+    # Naive Bayes with hyperparameter tuning
+    print("Tuned Naive Bayes:")
+    classifier = tune_naive_bayes(X_train, y_train)
+    acc_naive_bayes = evaluate_model(classifier, X_test, y_test)
 
 if __name__ == "__main__":
     main()
