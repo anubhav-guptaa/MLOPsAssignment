@@ -1,0 +1,68 @@
+name: Train Model, Build Docker Image, Push to Docker Hub and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  train-and-deploy:
+    runs-on: ubuntu-latest  # Run on the latest Ubuntu image
+
+    steps:
+    # Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Set up Python environment
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    # Install dependencies for running train.py (You can add more dependencies if needed)
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Run train.py to train and save the model
+    - name: Run training script
+      run: |
+        python train.py  # This will run the script that trains the model and saves it to the model folder
+
+    # Set up Docker Buildx (for advanced multi-platform builds)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    # Login to Docker Hub
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}  
+        password: ${{ secrets.DOCKER_PASSWORD }}  
+
+    # Build the Docker image
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
+
+    # Push the Docker image to Docker Hub
+    - name: Push Docker image to Docker Hub
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/flask-app:latest  
+
+    # Deploy the Flask app to AWS EC2
+    - name: Deploy to AWS EC2
+      run: |
+        ssh -i ${{ secrets.AWS_SSH_KEY }} ec2-user@${{ secrets.EC2_IP_ADDRESS }} << EOF
+          # SSH into EC2 instance and pull the latest Docker image
+          docker pull ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
+          
+          # Stop and remove the old container if it exists
+          docker stop flask-app-container || true
+          docker rm flask-app-container || true
+          
+          # Run the new container
+          docker run -d -p 8080:8080 --name flask-app-container ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
+        EOF
