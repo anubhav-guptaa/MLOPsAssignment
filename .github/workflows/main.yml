@@ -54,7 +54,7 @@ jobs:
 
     # Set up SSH private key for AWS EC2 deployment
     - name: Set up SSH key
-      run: echo "${{ secrets.AWS_SSH_KEY }}" > private_key.pem
+      run: echo "${{ secrets.AWS_SSH_KEY }}" | tr -d '\r' > private_key.pem
 
     # Change the permissions of the private key file
     - name: Set permissions for SSH key
