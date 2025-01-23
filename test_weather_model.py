@@ -12,7 +12,7 @@ from train import (
 
 # Test for Data Loading
 def test_load_data():
-    data = load_data("weather.csv")
+    data = load_data("./data/weather.csv")
     assert isinstance(data, pd.DataFrame), "Data is not loaded as a DataFrame"
     assert not data.empty, "Dataframe is empty"
 

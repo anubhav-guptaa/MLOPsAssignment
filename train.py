@@ -110,7 +110,7 @@ def svm_model(X_train, y_train):
 # Main function to run the entire workflow
 def main():
     # Load the data
-    data = load_data("weather.csv")
+    data = load_data("./data/weather.csv")
     
     # Data preprocessing
     check_missing_values(data)
