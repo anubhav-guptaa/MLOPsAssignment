@@ -60,6 +60,11 @@ jobs:
     - name: Set permissions for SSH key
       run: chmod 600 private_key.pem
 
+    # Add the EC2 instance's SSH host to known hosts
+    - name: Add EC2 instance to known hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.EC2_IP_ADDRESS }} >> ~/.ssh/known_hosts
+
     # Deploy the Flask app to AWS EC2
     - name: Deploy to AWS EC2
       run: |
