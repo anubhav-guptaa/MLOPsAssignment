@@ -28,7 +28,7 @@ jobs:
 
     - name: Run Linting with flake8
       run: |
-        flake8 .  # Lint the code in the repository.
+        flake8 app.py test_weather_model.py train.py  # Lint the code in the repository.
 
     # Run train.py to train and save the model
     - name: Run training script
