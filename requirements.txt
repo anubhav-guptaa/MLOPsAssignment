@@ -8,3 +8,4 @@ pytest
 flask
 gunicorn
 joblib
+flake8
