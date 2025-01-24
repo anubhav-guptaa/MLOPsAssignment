@@ -12,7 +12,7 @@ from train import (
 
 
 def test_load_data():
-    data = load_data("weather.csv")
+    data = load_data(".data/weather.csv")
     assert isinstance(data, pd.DataFrame), "Data is not loaded as a DataFrame"
     assert not data.empty, "Dataframe is empty"
 
@@ -20,7 +20,7 @@ def test_load_data():
 
 
 def test_check_missing_values():
-    data = load_data("weather.csv")
+    data = load_data("./data/weather.csv")
     missing_values = check_missing_values(data)
     assert missing_values.sum() == 0, "There are missing values in the dataset"
 
@@ -28,7 +28,7 @@ def test_check_missing_values():
 
 
 def test_convert_date_column():
-    data = load_data("weather.csv")
+    data = load_data("./data/weather.csv")
     convert_date_column(data)
     assert pd.api.types.is_datetime64_any_dtype(
         data['date']), "Date column was not converted to datetime"
@@ -37,7 +37,7 @@ def test_convert_date_column():
 
 
 def test_logistic_regression_accuracy():
-    data = load_data("weather.csv")
+    data = load_data("./data/weather.csv")
     X_train, X_test, y_train, y_test = preprocess_data(data)
     classifier = logistic_regression(X_train, y_train)
     accuracy = evaluate_model(classifier, X_test, y_test)
