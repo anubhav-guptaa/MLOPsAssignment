@@ -26,10 +26,18 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Run Linting with flake8
+      run: |
+        flake8 .  # Lint the code in the repository.
+
     # Run train.py to train and save the model
     - name: Run training script
       run: |
         python train.py  # This will run the script that trains the model and saves it to the model folder
+
+    - name: Run Pytest tests
+      run: |
+        pytest
 
     # Set up Docker Buildx (for advanced multi-platform builds)
     - name: Set up Docker Buildx
